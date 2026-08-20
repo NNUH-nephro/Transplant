@@ -287,6 +287,259 @@ dl.help dd{margin:4px 0 0;color:var(--ink);font-size:13.5px;max-width:80ch}
 
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
+window.__DATA__ = {"donor":[{"group":"A. Referral, Eligibility and Legal Screening"},{"key":"d1","ref":"G1.2","text":"Donor is an adult (≥ 18 years) and mental capacity confirmed","gate":false},{"key":"d2","ref":"G1.2","text":"Relationship to recipient documented (relative to 4th degree) with supporting documents","gate":false},{"key":"d3","ref":"G1.5","text":"Government-issued identification copy on file (donor and recipient)","gate":false},{"key":"d4","ref":"G1.2","text":"Voluntariness confirmed — no payment, brokerage or inducement","gate":false},{"key":"d5","ref":"G2.2","text":"Initial medical history taken (chronic illness, medicines, surgery, obstetric, family history)","gate":false},{"key":"d6","ref":"G2.2","text":"Physical examination completed including BMI","gate":false},{"key":"d7","ref":"G2.2","text":"Blood pressure recorded on at least two separate occasions","gate":false},{"key":"d8","ref":"G2.2","text":"Screening contraindications excluded (diabetes, uncontrolled HTN, kidney disease, malignancy, psychiatric illness)","gate":false},{"group":"B. Laboratory Investigations (§G2.3)"},{"key":"d9","ref":"G2.3","text":"Complete blood count","gate":false},{"key":"d10","ref":"G2.3","text":"Serum creatinine and eGFR — must exceed 90 mL/min/1.73 m²","gate":false},{"key":"d11","ref":"G2.3","text":"Measured GFR or 24-hour creatinine clearance (only if eGFR borderline)","gate":false},{"key":"d12","ref":"G2.3","text":"Liver function tests — AST, ALT, ALP, bilirubin, albumin","gate":false},{"key":"d13","ref":"G2.3","text":"Urinalysis","gate":false},{"key":"d14","ref":"G2.3","text":"Urine culture","gate":false},{"key":"d15","ref":"G2.3","text":"24-hour urine protein — must be < 300 mg/24 h","gate":false},{"key":"d16","ref":"G2.3","text":"Fasting blood glucose","gate":false},{"key":"d17","ref":"G2.3","text":"HbA1c","gate":false},{"key":"d18","ref":"G2.3","text":"Oral glucose tolerance test (only if impaired fasting glucose or strong family history)","gate":false},{"key":"d19","ref":"G2.3","text":"Lipid profile","gate":false},{"key":"d20","ref":"G2.3","text":"Uric acid, calcium and phosphate","gate":false},{"key":"d21","ref":"G2.3","text":"Coagulation screen","gate":false},{"key":"d22","ref":"G2.3","text":"ABO blood group and Rh typing","gate":false},{"key":"d23","ref":"G2.3","text":"HIV serology","gate":false},{"key":"d24","ref":"G2.3","text":"HBsAg and anti-HBc","gate":false},{"key":"d25","ref":"G2.3","text":"Anti-HCV","gate":false},{"key":"d26","ref":"G2.3","text":"CMV IgG  — required to set the recipient's CMV strategy (§G7.4)","gate":false},{"key":"d27","ref":"G2.3","text":"EBV IgG  — required to set EBV surveillance (§G8.3)","gate":false},{"key":"d28","ref":"G2.3","text":"Syphilis serology","gate":false},{"key":"d29","ref":"G2.3","text":"Tuberculosis screening by IGRA","gate":false},{"key":"d30","ref":"G2.3","text":"HLA typing — Cl  border:1px solid transparent;border-radius:8px;padding:7px 13px;font-size:13.5px;font-weight:550;
+  background:#fff;color:var(--navy);transition:background .12s,border-color .12s,transform .06s;
+}
+.btn:hover{background:#eef3fa}
+.btn:active{transform:translateY(1px)}
+.btn-ghost{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.32)}
+.btn-ghost:hover{background:rgba(255,255,255,.2)}
+.savestate{font-size:12px;padding:4px 10px;border-radius:20px;font-weight:600;white-space:nowrap}
+.savestate.saved{background:rgba(255,255,255,.14);color:#cfe3d4}
+.savestate.unsaved{background:#ffd8a8;color:#7a4a00}
+
+.chips{max-width:1240px;margin:0 auto;padding:0 20px 10px;display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:flex;gap:7px;align-items:baseline;background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:3px 12px;font-size:12.5px;color:#e6eef8}
+.chip strong{font-size:13.5px}
+.chip.ok strong{color:#a8e6bf}.chip.warn strong{color:#ffd89a}.chip.bad strong{color:#ffb3ac}
+.chip-l{color:#b9c8de}
+
+/* ---------- tabs ---------- */
+.tabs{background:var(--blue);position:sticky;top:0;z-index:55}
+.tabs-in{max-width:1240px;margin:0 auto;padding:0 12px;display:flex;gap:2px;overflow-x:auto}
+.tab{background:none;border:0;color:#d8e5f3;padding:11px 15px;font-size:13.5px;font-weight:550;
+  border-bottom:3px solid transparent;white-space:nowrap}
+.tab:hover{color:#fff;background:rgba(255,255,255,.07)}
+.tab.active{color:#fff;border-bottom-color:#fff;background:rgba(255,255,255,.1)}
+
+/* ---------- layout ---------- */
+main{max-width:1240px;margin:0 auto;padding:20px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}
+.card h2{font-size:17px;color:var(--navy)}
+.card .sub{font-size:13px;color:var(--muted);margin-top:3px}
+.sticky-head{position:sticky;top:44px;z-index:40}
+.group{padding:0;overflow:hidden}
+.group-title{font-size:13px;font-weight:650;color:#fff;background:var(--blue);padding:9px 16px;letter-spacing:.01em}
+
+/* ---------- forms ---------- */
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field>span{font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.field input{border:1px solid var(--line);border-radius:7px;padding:7px 9px;background:#fff;min-width:0}
+.field input:focus{outline:2px solid var(--blue);outline-offset:-1px;border-color:var(--blue)}
+.field.small>span{font-size:10.5px}
+.field.small input{padding:5px 8px;font-size:13px}
+.field.grow{flex:1 1 200px}
+.warn-input{border-color:#e0a63c!important;background:#fffaf0}
+
+.toolbar{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-top:14px}
+.search{flex:1 1 240px;border:1px solid var(--line);border-radius:7px;padding:7px 11px}
+.search:focus{outline:2px solid var(--blue);outline-offset:-1px}
+.segmented{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.seg-btn{border:0;background:#fff;padding:7px 13px;font-size:13px;color:var(--muted);border-right:1px solid var(--line)}
+.seg-btn:last-child{border-right:0}
+.seg-btn.on{background:var(--navy);color:#fff;font-weight:600}
+.seg-btn:hover:not(.on){background:var(--light)}
+
+/* ---------- progress ---------- */
+.big-pct{font-size:38px;font-weight:700;color:var(--navy);line-height:1.1;margin:10px 0 6px}
+.bar{display:flex;height:9px;border-radius:5px;overflow:hidden;background:var(--na-bg);margin:10px 0}
+.seg{height:100%}
+.seg-complete{background:var(--ok)}
+.seg-pending{background:#e0a63c}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.stat{display:flex;flex-direction:column;background:var(--band);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stat strong{font-size:19px;line-height:1.1}
+.stat span{font-size:11px;color:var(--muted);margin-top:2px}
+.inline-stats{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:10px;align-items:center}
+.inline-stats strong{color:var(--ink);font-size:14px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}.muted{color:var(--na)}
+.ready{border-radius:8px;padding:9px 12px;font-weight:650;font-size:13.5px;text-align:center;margin-bottom:12px}
+.ready-yes{background:var(--ok-bg);color:var(--ok)}
+.ready-no{background:var(--bad-bg);color:var(--bad)}
+.ready-inline{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.ready-inline.ready-yes{background:var(--ok-bg);color:var(--ok)}
+.ready-inline.ready-no{background:var(--bad-bg);color:var(--bad)}
+.btn-quiet{border-color:var(--line);width:100%;color:var(--blue)}
+
+/* ---------- items ---------- */
+.item{display:grid;grid-template-columns:1fr auto;gap:10px 16px;padding:12px 16px;border-top:1px solid var(--line);align-items:start}
+.group .item:first-of-type{border-top:0}
+.item.s-complete{background:linear-gradient(90deg,var(--ok-bg) 0 3px,#fff 3px)}
+.item.s-pending{background:linear-gradient(90deg,#e0a63c 0 3px,#fff 3px)}
+.item.s-todo{background:linear-gradient(90deg,var(--bad) 0 3px,#fff 3px)}
+.item.s-na{background:linear-gradient(90deg,var(--na) 0 3px,#fafbfc 3px);opacity:.72}
+.item.v-attended{background:linear-gradient(90deg,var(--ok) 0 3px,#fff 3px)}
+.item.v-overdue{background:linear-gradient(90deg,var(--bad) 0 3px,#fff 3px)}
+.item.v-due{background:linear-gradient(90deg,#e0a63c 0 3px,#fff 3px)}
+.item.v-scheduled,.item.v-unset{background:#fff}
+.item.is-gate .item-title{font-weight:650;color:var(--navy)}
+.item-main{min-width:0}
+.item-title{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-size:14px}
+.item-meta{display:flex;gap:10px;align-items:center;margin-top:5px;flex-wrap:wrap}
+.item-ctl{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;justify-content:flex-end}
+.item-extra{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap}
+.dates{display:flex;gap:8px}
+.tests{font-size:12.5px;color:var(--muted);margin-top:6px;max-width:70ch}
+.ref{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;background:var(--band);
+  border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.due{font-size:12px;color:var(--muted)}
+.gate-pill{background:var(--navy);color:#fff;font-size:10px;font-weight:700;letter-spacing:.06em;
+  border-radius:4px;padding:2px 6px}
+.na{display:flex;gap:5px;align-items:center;font-size:12.5px;color:var(--muted);padding-bottom:6px;white-space:nowrap}
+.na input{width:15px;height:15px}
+.btn-tick{border-color:var(--line);background:#fff;color:var(--ok);min-width:118px}
+.btn-tick.on{background:var(--ok);border-color:var(--ok);color:#fff}
+
+.badge{font-size:11px;font-weight:650;border-radius:20px;padding:2px 9px;white-space:nowrap}
+.b-complete,.b-attended{background:var(--ok-bg);color:var(--ok)}
+.b-pending,.b-due{background:var(--warn-bg);color:var(--warn)}
+.b-todo,.b-overdue{background:var(--bad-bg);color:var(--bad)}
+.b-na,.b-scheduled,.b-unset{background:var(--na-bg);color:var(--na)}
+
+/* ---------- misc ---------- */
+.gate-list{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.gate-list li{display:flex;gap:9px;align-items:baseline;font-size:13.5px;padding:8px 11px;
+  background:var(--bad-bg);border-radius:7px}
+.tag{font-size:10.5px;font-weight:700;border-radius:4px;padding:2px 7px;white-space:nowrap}
+.tag-d{background:#dbe7f6;color:#1b4a80}
+.tag-r{background:#e6e0f5;color:#4a327d}
+.ok-note{margin-top:12px;background:var(--ok-bg);color:var(--ok);padding:10px 12px;border-radius:8px;font-weight:600;font-size:13.5px}
+.muted-note{margin-top:12px;color:var(--muted);font-size:13.5px}
+table.grid{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+table.grid th{text-align:left;background:var(--band);color:var(--muted);font-size:11.5px;
+  text-transform:uppercase;letter-spacing:.04em;padding:7px 10px;border-bottom:1px solid var(--line)}
+table.grid td{padding:8px 10px;border-bottom:1px solid var(--line)}
+dl.help{margin:14px 0 0}
+dl.help dt{font-weight:650;color:var(--navy);font-size:13.5px;margin-top:14px}
+dl.help dd{margin:4px 0 0;color:var(--ink);font-size:13.5px;max-width:80ch}
+.keygrid{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,14px);background:var(--navy);color:#fff;
+  padding:11px 18px;border-radius:9px;font-size:13.5px;opacity:0;transition:.25s;z-index:200;box-shadow:0 6px 24px rgba(0,0,0,.22)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.bad{background:var(--bad)}
+.patient-banner{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:12px 20px;
+  display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;position:sticky;top:44px;z-index:50}
+.patient-banner b{font-size:20px;font-weight:750;letter-spacing:-.01em}
+.patient-banner span{color:#dbe6f4;font-size:14px}
+#caseActions{align-items:center}
+.case-actions.off{display:none}
+.case-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.case-actions .btn{background-color:#fff!important;color:var(--navy)!important}
+.case-actions .btn.btn-ghost{background-color:rgba(255,255,255,.16)!important;color:#fff!important}
+
+/* ---------- registry / cloud ---------- */
+.cloud-pill{font-size:12px;padding:4px 10px;border-radius:20px;font-weight:600;white-space:nowrap}
+.cloud-pill.on{background:rgba(255,255,255,.14);color:#cfe3d4}
+.cloud-pill.off{background:#ffd8a8;color:#7a4a00}
+.cloud-pill.busy{background:rgba(255,255,255,.14);color:#e6eef8}
+.reg-hero{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;border-radius:var(--radius);
+  padding:24px 26px;box-shadow:var(--shadow)}
+.reg-hero h2{color:#fff;font-size:20px}
+.reg-hero p{color:#dbe6f4;margin-top:5px;font-size:13.5px;max-width:70ch}
+.case-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.case-row{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;
+  background:#fff;border:1px solid var(--line);border-radius:9px;padding:12px 14px;cursor:pointer;transition:border-color .12s,box-shadow .12s}
+.case-row:hover{border-color:var(--blue);box-shadow:0 2px 10px rgba(30,60,100,.08)}
+.case-row .who{display:flex;flex-direction:column;gap:2px}
+.case-row .who b{font-size:14px;color:var(--ink)}
+.case-row .who span{font-size:12px;color:var(--muted)}
+.case-row .mrns{font-size:12px;color:var(--muted);text-align:right}
+.case-row .upd{font-size:11px;color:var(--na);white-space:nowrap}
+.empty-state{padding:20px;text-align:center;color:var(--muted);font-size:13.5px}
+.patient-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.patient-head h2{font-size:19px}
+.sheet-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.sheet-tile{border:1px solid var(--line);background:#fff;border-radius:9px;padding:14px 14px;text-align:left}
+.sheet-tile:hover{border-color:var(--blue);background:var(--light)}
+.sheet-tile b{display:block;font-size:14px;color:var(--navy);margin-bottom:4px}
+.sheet-tile span{font-size:12px;color:var(--muted)}
+.sheet-tile .pct{float:right;font-weight:700;color:var(--navy)}
+@media(max-width:900px){.sheet-tiles{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.sheet-tiles{grid-template-columns:1fr}}
+
+/* ---------- modal ---------- */
+.modal-back{position:fixed;inset:0;background:rgba(15,25,40,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:#fff;border-radius:12px;max-width:520px;width:100%;max-height:90vh;overflow:auto;padding:22px 24px;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.modal h2{font-size:17px;color:var(--navy)}
+.modal .sub{font-size:12.5px;color:var(--muted);margin-top:4px}
+.modal .form-grid{grid-template-columns:1fr}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.pending-toggle{border:1px solid var(--line);background:#fff;color:var(--warn);border-radius:7px;padding:6px 10px;font-size:12.5px;font-weight:600;min-width:96px}
+.pending-toggle.on{background:var(--warn-bg);border-color:#e0a63c}
+.reminder-preview{background:var(--band);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12.5px;max-height:220px;overflow:auto;white-space:pre-wrap}
+
+@media(max-width:900px){
+  .two-col{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr 1fr}
+  .item{grid-template-columns:1fr}
+  .item-ctl{justify-content:flex-start}
+  .sticky-head{position:static}
+}
+@media(max-width:560px){.form-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
+
+/* ---------- print ---------- */
+@media print{
+  body{background:#fff}
+  .appbar,.tabs,.toolbar,.btn,.na input,.toast,.chips{display:none!important}
+  main{max-width:none;padding:0}
+  .card{border:0;box-shadow:none;padding:0 0 10px;break-inside:auto}
+  .sticky-head{position:static}
+  .item{break-inside:avoid;padding:6px 0;border-top:1px solid #ccc}
+  .group-title{background:#eee!important;color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .badge,.ready,.chip{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .field input{border:0;border-bottom:1px solid #999;border-radius:0}
+  #printAll{display:block!important}
+}
+
+</style>
+</head>
+<body>
+<header class="appbar">
+  <div class="appbar-in">
+    <div class="brand">
+      <strong>Transplant Coordinator Tracker</strong>
+      <span>An-Najah National University Hospital &middot; Kidney Transplant Program &middot; Manual v2.1</span>
+    </div>
+    <div class="actions">
+      <button class="btn btn-ghost" id="btnBack" style="visibility:hidden">&#8592; Back</button>
+      <button class="btn btn-ghost" id="btnHome">&#8962; Registry</button>
+      <button class="btn btn-ghost" id="btnSwitch">&#128100; View all donors &amp; recipients</button>
+      <span id="saveState" class="cloud-pill off">Cloud not configured</span>
+      <div id="caseActions" class="case-actions off">
+        <button class="btn" id="btnCloudSave">Save to cloud</button>
+        <button class="btn btn-ghost" id="btnExportSheet">Export to Google Sheet</button>
+        <button class="btn btn-ghost" id="btnCsv">Export CSV</button>
+        <button class="btn btn-ghost" id="btnPrint">Print</button>
+      </div>
+      <button class="btn btn-ghost" id="btnRemind">Email reminder</button>
+      <button class="btn btn-ghost" id="btnSettings">Settings</button>
+      <input type="file" id="fileInput" accept="application/json,.json" hidden>
+    </div>
+  </div>
+  <div class="chips" id="headerChips"></div>
+</header>
+
+<nav class="tabs">
+  <div class="tabs-in">
+      <button class="tab" data-tab="overview">Overview</button>
+      <button class="tab" data-tab="donor">Donor checklist</button>
+      <button class="tab" data-tab="recipient">Recipient checklist</button>
+      <button class="tab" data-tab="rfu">Recipient follow-up</button>
+      <button class="tab" data-tab="dfu">Donor follow-up</button>
+      <button class="tab" data-tab="help">How to use</button>
+  </div>
+</nav>
+<div id="patientBanner" class="patient-banner" style="display:none"></div>
+
+<main id="app"></main>
+<div id="modalRoot"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
 window.__DATA__ = {"donor":[{"group":"A. Referral, Eligibility and Legal Screening"},{"key":"d1","ref":"G1.2","text":"Donor is an adult (≥ 18 years) and mental capacity confirmed","gate":false},{"key":"d2","ref":"G1.2","text":"Relationship to recipient documented (relative to 4th degree) with supporting documents","gate":false},{"key":"d3","ref":"G1.5","text":"Government-issued identification copy on file (donor and recipient)","gate":false},{"key":"d4","ref":"G1.2","text":"Voluntariness confirmed — no payment, brokerage or inducement","gate":false},{"key":"d5","ref":"G2.2","text":"Initial medical history taken (chronic illness, medicines, surgery, obstetric, family history)","gate":false},{"key":"d6","ref":"G2.2","text":"Physical examination completed including BMI","gate":false},{"key":"d7","ref":"G2.2","text":"Blood pressure recorded on at least two separate occasions","gate":false},{"key":"d8","ref":"G2.2","text":"Screening contraindications excluded (diabetes, uncontrolled HTN, kidney disease, malignancy, psychiatric illness)","gate":false},{"group":"B. Laboratory Investigations (§G2.3)"},{"key":"d9","ref":"G2.3","text":"Complete blood count","gate":false},{"key":"d10","ref":"G2.3","text":"Serum creatinine and eGFR — must exceed 90 mL/min/1.73 m²","gate":false},{"key":"d11","ref":"G2.3","text":"Measured GFR or 24-hour creatinine clearance (only if eGFR borderline)","gate":false},{"key":"d12","ref":"G2.3","text":"Liver function tests — AST, ALT, ALP, bilirubin, albumin","gate":false},{"key":"d13","ref":"G2.3","text":"Urinalysis","gate":false},{"key":"d14","ref":"G2.3","text":"Urine culture","gate":false},{"key":"d15","ref":"G2.3","text":"24-hour urine protein — must be < 300 mg/24 h","gate":false},{"key":"d16","ref":"G2.3","text":"Fasting blood glucose","gate":false},{"key":"d17","ref":"G2.3","text":"HbA1c","gate":false},{"key":"d18","ref":"G2.3","text":"Oral glucose tolerance test (only if impaired fasting glucose or strong family history)","gate":false},{"key":"d19","ref":"G2.3","text":"Lipid profile","gate":false},{"key":"d20","ref":"G2.3","text":"Uric acid, calcium and phosphate","gate":false},{"key":"d21","ref":"G2.3","text":"Coagulation screen","gate":false},{"key":"d22","ref":"G2.3","text":"ABO blood group and Rh typing","gate":false},{"key":"d23","ref":"G2.3","text":"HIV serology","gate":false},{"key":"d24","ref":"G2.3","text":"HBsAg and anti-HBc","gate":false},{"key":"d25","ref":"G2.3","text":"Anti-HCV","gate":false},{"key":"d26","ref":"G2.3","text":"CMV IgG  — required to set the recipient's CMV strategy (§G7.4)","gate":false},{"key":"d27","ref":"G2.3","text":"EBV IgG  — required to set EBV surveillance (§G8.3)","gate":false},{"key":"d28","ref":"G2.3","text":"Syphilis serology","gate":false},{"key":"d29","ref":"G2.3","text":"Tuberculosis screening by IGRA","gate":false},{"key":"d30","ref":"G2.3","text":"HLA typing — Class I and II","gate":false},{"key":"d31","ref":"G2.3","text":"Crossmatch — complement-dependent cytotoxicity","gate":false},{"key":"d32","ref":"G2.3","text":"Crossmatch — flow cytometry","gate":false},{"key":"d33","ref":"G2.3","text":"Pregnancy test — women of childbearing potential, within 7 days of surgery","gate":false},{"group":"C. Radiological and Cardiac Evaluation (§G2.4)"},{"key":"d34","ref":"G2.4","text":"CT angiography of the kidneys","gate":false},{"key":"d35","ref":"G2.4","text":"Renal ultrasound","gate":false},{"key":"d36","ref":"G2.4","text":"Chest radiograph","gate":false},{"key":"d37","ref":"G2.4","text":"ECG","gate":false},{"key":"d38","ref":"G2.4","text":"Echocardiogram (donors > 50 years, or hypertension, murmur or symptoms)","gate":false},{"key":"d39","ref":"G2.4","text":"Stress testing or coronary angiography (only if clinically indicated)","gate":false},{"group":"D. Psychosocial and Mental Health Evaluation (§G2.5)"},{"key":"d40","ref":"G2.5","text":"Psychological / psychiatric assessment — depression, anxiety and coercion screen","gate":false},{"key":"d41","ref":"G2.5","text":"Motivation and expectations explored and documented","gate":false},{"key":"d42","ref":"G2.5","text":"Social support for the recovery period confirmed","gate":false},{"key":"d43","ref":"G2.5","text":"Decision-making capacity confirmed — donor explains risks in own words","gate":false},{"key":"d44","ref":"G2.5","text":"Employment, income and insurance counselling documented","gate":false},{"group":"E. Multidisciplinary Team Review (§G2.8)"},{"key":"d45","ref":"G2.8","text":"Transplant nephrologist review — renal risk and projected lifetime ESRD risk documented","gate":false},{"key":"d46","ref":"G2.8","text":"Transplant surgeon review — anatomical feasibility and side of nephrectomy selected","gate":false},{"key":"d47","ref":"G2.8","text":"Transplant coordinator — structured education delivered and documented","gate":false},{"key":"d48","ref":"G2.8","text":"Social worker assessment","gate":false},{"key":"d49","ref":"G2.8","text":"Anaesthetic assessment and ASA classification","gate":false},{"key":"d50","ref":"G2.8","text":"Dietitian review (if indicated)","gate":false},{"group":"F. Consent, Legal and Ethics — MANDATORY GATES (§G1.5, §G2.6, §G2.7)"},{"key":"d51","ref":"G2.6","text":"GATE — Independent Donor Advocate met the donor alone; written opinion filed","gate":true},{"key":"d52","ref":"G2.7","text":"Written informed consent for evaluation (Arabic + English), witnessed","gate":false},{"key":"d53","ref":"G2.7","text":"Written informed consent for surgery (Arabic + English), witnessed","gate":false},{"key":"d54","ref":"G1.2","text":"Right of withdrawal explained verbally and in writing","gate":false},{"key":"d55","ref":"G2.7","text":"Interpreter or legal guardian provided where needed","gate":false},{"key":"d56","ref":"G2.7","text":"Absence of financial incentive confirmed and documented","gate":false},{"key":"d57","ref":"G1.5","text":"Organ donation declaration form (Ministry of Health) completed","gate":false},{"key":"d58","ref":"G2.9","text":"Donor summary report submitted to the Transplant Committee","gate":false},{"key":"d59","ref":"G2.7","text":"GATE — Ethics Committee approval obtained","gate":true},{"key":"d60","ref":"G1.5","text":"GATE — Multidisciplinary Transplant Committee approval minuted","gate":true},{"group":"G. Pre-operative Preparation (§G3.2)"},{"key":"d61","ref":"G3.2","text":"Donor identity confirmed using two identifiers","gate":false},{"key":"d62","ref":"G3.2","text":"Complete evaluation file and BOTH committee approvals verified in the chart","gate":false},{"key":"d63","ref":"G3.2","text":"Blood group and a current negative crossmatch re-confirmed","gate":false},{"key":"d64","ref":"G3.2","text":"Fasting instructions given — 8 h solids, clear fluids to 2 h","gate":false},{"key":"d65","ref":"G3.2","text":"Bowel preparation (only if specified by the operating surgeon)","gate":false},{"key":"d66","ref":"G3.2","text":"Venous access established, hydration commenced, baseline labs taken","gate":false},{"key":"d67","ref":"G7.2","text":"Surgical antibiotic prophylaxis prescribed — cefazolin 2 g IV within 60 min of incision","gate":false},{"key":"d68","ref":"G3.2","text":"VTE risk assessment completed with mechanical prophylaxis applied","gate":false},{"key":"d69","ref":"G3.2","text":"WHO surgical safety checklist and time-out completed","gate":false},{"key":"d70","ref":"G3.2","text":"Operative side independently confirmed against the CT angiogram by two staff members","gate":false},{"key":"d71","ref":"G3.2","text":"Consent re-verified with the donor personally on the day of surgery","gate":false},{"group":"H. Post-operative Care and Discharge (§G3.4, §G3.5)"},{"key":"d72","ref":"G3.4","text":"PACU observations documented and donor cleared for transfer","gate":false},{"key":"d73","ref":"G3.4","text":"Early ambulation achieved within 6–12 hours","gate":false},{"key":"d74","ref":"G3.4","text":"Daily CBC, creatinine and electrolytes until stable and improving","gate":false},{"key":"d75","ref":"G3.5","text":"All seven discharge criteria met and documented","gate":false},{"key":"d76","ref":"G3.5","text":"Discharge education — wound care, warning signs, permanent NSAID avoidance, activity restriction","gate":false},{"key":"d77","ref":"G3.5","text":"24-hour emergency contact details provided in writing","gate":false},{"key":"d78","ref":"G3.7","text":"Operative report completed within 24 hours","gate":false},{"key":"d79","ref":"G3.7","text":"Discharge summary issued and copied to the donor","gate":false},{"key":"d80","ref":"G3.7","text":"Any donor complication reported to Quality & Patient Safety within 24 hours","gate":false},{"key":"d81","ref":"G8.6","text":"GATE — Donor entered on the LIFELONG donor follow-up register","gate":true}],"recipient":[{"group":"A. Referral and Initial Assessment (§G4.2)"},{"key":"r1","ref":"G4.2","text":"Medical history — cause of ESRD, dialysis history, comorbidities, transfusions, pregnancies, prior transplants and rejection","gate":false},{"key":"r2","ref":"G4.2","text":"Physical examination — cardiopulmonary, abdominal, peripheral vascular, dialysis access, BMI","gate":false},{"key":"r3","ref":"G4.2","text":"Functional status and frailty assessment","gate":false},{"key":"r4","ref":"G4.2","text":"Adherence history documented — dialysis attendance, medication, clinic attendance","gate":false},{"key":"r5","ref":"G1.5","text":"Government-issued identification copy on file","gate":false},{"group":"B. Laboratory Tests (§G4.3)"},{"key":"r6","ref":"G4.3","text":"Complete blood count","gate":false},{"key":"r7","ref":"G4.3","text":"Electrolytes, urea and creatinine","gate":false},{"key":"r8","ref":"G4.3","text":"Calcium, phosphate and PTH","gate":false},{"key":"r9","ref":"G4.3","text":"Liver function tests and albumin","gate":false},{"key":"r10","ref":"G4.3","text":"Fasting glucose","gate":false},{"key":"r11","ref":"G4.3","text":"HbA1c","gate":false},{"key":"r12","ref":"G4.3","text":"Lipid profile","gate":false},{"key":"r13","ref":"G4.3","text":"Coagulation screen","gate":false},{"key":"r14","ref":"G4.3","text":"Thrombophilia screen (only if history of access thrombosis)","gate":false},{"key":"r15","ref":"G4.3","text":"HIV serology","gate":false},{"key":"r16","ref":"G4.3","text":"HBsAg, anti-HBs and anti-HBc","gate":false},{"key":"r17","ref":"G4.3","text":"Anti-HCV","gate":false},{"key":"r18","ref":"G4.3","text":"CMV IgG  — required to set the CMV prophylaxis strategy (§G7.4)","gate":false},{"key":"r19","ref":"G4.3","text":"EBV IgG  — required to set EBV surveillance (§G8.3)","gate":false},{"key":"r20","ref":"G4.3","text":"VZV IgG","gate":false},{"key":"r21","ref":"G4.3","text":"Syphilis serology","gate":false},{"key":"r22","ref":"G4.3","text":"Tuberculosis screening by IGRA, with chest radiograph","gate":false},{"key":"r23","ref":"G4.3","text":"ABO blood group and Rh typing","gate":false},{"key":"r24","ref":"G4.3","text":"HLA typing — Class I and II","gate":false},{"key":"r25","ref":"G4.3","text":"Antibody screen and cPRA — sensitisation quantified, unacceptable antigens listed","gate":false},{"key":"r26","ref":"G4.3","text":"Crossmatch — CDC and flow cytometry","gate":false},{"key":"r27","ref":"G4.3","text":"Urinalysis and urine culture (if residual urine output)","gate":false},{"group":"C. Cardiovascular and Pulmonary Assessment (§G4.4)"},{"key":"r28","ref":"G4.4","text":"Chest radiograph","gate":false},{"key":"r29","ref":"G4.4","text":"ECG","gate":false},{"key":"r30","ref":"G4.4","text":"Echocardiogram — EF, valves, pulmonary pressures, LVH","gate":false},{"key":"r31","ref":"G4.4","text":"Non-invasive stress testing (diabetes, age > 50, smoking, known CAD, or ≥ 2 risk factors)","gate":false},{"key":"r32","ref":"G4.4","text":"Coronary angiography (if stress test positive/equivocal or symptoms)","gate":false},{"key":"r33","ref":"G4.4","text":"Pulmonary function tests (significant smoking history or chronic lung disease)","gate":false},{"group":"D. Imaging and Surgical Planning (§G4.5)"},{"key":"r34","ref":"G4.5","text":"Abdominal ultrasound","gate":false},{"key":"r35","ref":"G4.5","text":"Non-contrast CT of abdomen and pelvis — iliac calcification and pelvic anatomy","gate":false},{"key":"r36","ref":"G4.5","text":"Doppler of iliac vessels — anastomosis site planned","gate":false},{"key":"r37","ref":"G4.5","text":"Renal ultrasound of native kidneys","gate":false},{"key":"r38","ref":"G4.5","text":"Urological assessment — urodynamics or VCUG (if bladder dysfunction or long-standing anuria)","gate":false},{"group":"E. Malignancy Screening (§G4.6)"},{"key":"r39","ref":"G4.6","text":"Colonoscopy (age ≥ 50, or earlier with family history or symptoms)","gate":false},{"key":"r40","ref":"G4.6","text":"Cervical cytology — women, per national policy","gate":false},{"key":"r41","ref":"G4.6","text":"Mammography — women ≥ 40 years, or per national policy","gate":false},{"key":"r42","ref":"G4.6","text":"Prostate-specific antigen — men ≥ 50 years, after discussion","gate":false},{"key":"r43","ref":"G4.6","text":"Baseline dermatological examination","gate":false},{"key":"r44","ref":"G4.6","text":"Oncology clearance and waiting period documented (if prior malignancy)","gate":false},{"group":"F. Infection Review and Immunisation (§G4.7, §G7.8)"},{"key":"r45","ref":"G4.7","text":"Latent or active infection identified and treated — TB, hepatitis, access infection, chronic ulcers","gate":false},{"key":"r46","ref":"G4.7","text":"Dental evaluation and formal dental clearance","gate":false},{"key":"r47","ref":"G7.8","text":"Hepatitis B vaccination course complete — anti-HBs titre checked 4–8 weeks after","gate":false},{"key":"r48","ref":"G7.8","text":"Influenza vaccination (inactivated)","gate":false},{"key":"r49","ref":"G7.8","text":"Pneumococcal vaccination","gate":false},{"key":"r50","ref":"G7.8","text":"COVID-19 primary course complete","gate":false},{"key":"r51","ref":"G7.8","text":"Tetanus / diphtheria / pertussis booster","gate":false},{"key":"r52","ref":"G7.8","text":"HPV vaccination (eligible age groups)","gate":false},{"key":"r53","ref":"G7.8","text":"LIVE vaccines given ≥ 4 weeks pre-transplant — MMR, varicella (contraindicated after transplant)","gate":false},{"key":"r54","ref":"G7.8","text":"Recombinant zoster vaccine","gate":false},{"key":"r55","ref":"G7.8","text":"Household contacts and caregivers vaccinated","gate":false},{"key":"r56","ref":"G7.8","text":"Vaccination record entered in the transplant record and copied to the patient","gate":false},{"group":"G. Psychosocial and Financial Evaluation (§G4.8)"},{"key":"r57","ref":"G4.8","text":"Mental health screen — depression, anxiety, cognitive impairment, substance use","gate":false},{"key":"r58","ref":"G4.8","text":"Named caregiver identified for the first three months post-transplant","gate":false},{"key":"r59","ref":"G4.8","text":"Financial coordinator review — sustainable access to immunosuppressants confirmed","gate":false},{"key":"r60","ref":"G4.8","text":"Understanding of lifelong immunosuppression and follow-up confirmed and documented","gate":false},{"key":"r61","ref":"G4.8","text":"Transport and distance feasibility for intensive early follow-up confirmed","gate":false},{"group":"H. Consent and Committee — MANDATORY GATES (§G4.10)"},{"key":"r62","ref":"G4.10","text":"Written informed consent (Arabic + English), signed and witnessed","gate":false},{"key":"r63","ref":"G5.2","text":"Immunological risk category assigned (standard / high / very high) and recorded in the chart","gate":false},{"key":"r64","ref":"G4.10","text":"Written evaluation summary submitted to the Multidisciplinary Transplant Committee","gate":false},{"key":"r65","ref":"G4.10","text":"GATE — Transplant Committee decision minuted (accept / defer / decline)","gate":true},{"key":"r66","ref":"G4.10","text":"Decision communicated to the patient in person and documented","gate":false},{"key":"r67","ref":"G4.10","text":"Annual re-evaluation completed (if waiting longer than 12 months)","gate":false},{"group":"I. Pre-operative Checks"},{"key":"r68","ref":"G4.10","text":"Crossmatch and virology repeated within 14 days of the planned surgery","gate":false},{"key":"r69","ref":"G7.4","text":"GATE — CMV donor/recipient serostatus PAIR documented and prophylaxis strategy chosen","gate":true},{"key":"r70","ref":"G8.3","text":"EBV donor/recipient serostatus PAIR documented (D+/R− triggers EBV DNA surveillance)","gate":false},{"key":"r71","ref":"G5.3","text":"Induction agent prescribed per risk category — basiliximab or anti-thymocyte globulin","gate":false},{"key":"r72","ref":"G5.3","text":"Intra-operative methylprednisolone 500 mg IV prescribed (before reperfusion)","gate":false},{"key":"r73","ref":"G7.2","text":"Surgical antibiotic prophylaxis prescribed — cefazolin 2 g IV within 60 min of incision","gate":false},{"key":"r74","ref":"G3.2","text":"WHO surgical safety checklist and time-out completed","gate":false},{"group":"J. Post-operative and Discharge"},{"key":"r75","ref":"G5.4.1","text":"Tacrolimus commenced and daily trough monitoring started","gate":false},{"key":"r76","ref":"G5.4.2","text":"Mycophenolate prescribed; contraception counselling documented if applicable","gate":false},{"key":"r77","ref":"G5.4.3","text":"Steroid taper prescribed; gastric protection, calcium and vitamin D prescribed","gate":false},{"key":"r78","ref":"G7.3","text":"PJP prophylaxis prescribed — TMP-SMX (or documented alternative if sulfa-allergic)","gate":false},{"key":"r79","ref":"G7.4","text":"CMV prophylaxis or pre-emptive strategy prescribed, renally dose-adjusted","gate":false},{"key":"r80","ref":"G7.5","text":"Antifungal prophylaxis prescribed — nystatin or clotrimazole","gate":false},{"key":"r81","ref":"G7.5","text":"Acyclovir prescribed (only if NOT receiving valganciclovir)","gate":false},{"key":"r82","ref":"G8.3","text":"Allograft Doppler ultrasound performed before discharge","gate":false},{"key":"r83","ref":"G7.2","text":"Ureteric stent removal date booked (2–4 weeks) and recorded","gate":false},{"key":"r84","ref":"G5.8","text":"Medication card issued in Arabic and English","gate":false},{"key":"r85","ref":"G7.9","text":"Patient education — warning signs, food and water safety, infection prevention","gate":false},{"key":"r86","ref":"G8.7","text":"Self-monitoring taught — daily weight, blood pressure, temperature, urine output","gate":false},{"key":"r87","ref":"G8.8","text":"Discharge summary issued with full medication list and drug-level plan","gate":false},{"key":"r88","ref":"G8.7","text":"24-hour emergency contact details provided in writing","gate":false},{"key":"r89","ref":"G8.2","text":"Follow-up appointments booked per the Guideline 8 schedule","gate":false},{"key":"r90","ref":"G8.2","text":"GATE — Patient entered on the follow-up register","gate":true}],"recipVisits":[{"section":"Clinic Visits (§G8.2) — weeks 1–4 require 2–3 visits per week; the rows below are the minimum milestones"},{"key":"rv1","label":"Day 3 after discharge","offset":3,"grace":2,"tests":"Creatinine, electrolytes, magnesium, CBC, glucose, tacrolimus trough; weight, BP, urine output, wound"},{"key":"rv2","label":"Day 7","offset":7,"grace":2,"tests":"As above"},{"key":"rv3","label":"Day 10","offset":10,"grace":2,"tests":"As above"},{"key":"rv4","label":"Day 14","offset":14,"grace":3,"tests":"As above"},{"key":"rv5","label":"Day 21","offset":21,"grace":3,"tests":"As above"},{"key":"rv6","label":"Day 28","offset":28,"grace":3,"tests":"As above; ureteric stent removal due 2–4 weeks (§G7.2)"},{"key":"rv7","label":"Week 6","offset":42,"grace":7,"tests":"As above; add urinalysis and urine protein-to-creatinine ratio"},{"key":"rv8","label":"Week 8","offset":56,"grace":7,"tests":"As above"},{"key":"rv9","label":"Month 3","offset":91,"grace":10,"tests":"Add LFTs, calcium, phosphate, uric acid; DSA; allograft Doppler ultrasound; protocol biopsy if high risk"},{"key":"rv10","label":"Month 4","offset":121,"grace":14,"tests":"Routine panel + tacrolimus trough"},{"key":"rv11","label":"Month 5","offset":152,"grace":14,"tests":"Routine panel + tacrolimus trough"},{"key":"rv12","label":"Month 6","offset":182,"grace":14,"tests":"Add HbA1c and lipid profile; DSA; end of PJP prophylaxis review; CMV surveillance if D+/R−"},{"key":"rv13","label":"Month 8","offset":243,"grace":21,"tests":"Routine panel + tacrolimus trough"},{"key":"rv14","label":"Month 10","offset":304,"grace":21,"tests":"Routine panel + tacrolimus trough"},{"key":"rv15","label":"Month 12","offset":365,"grace":21,"tests":"DSA; UPCR; annual comprehensive review (§G8.5); protocol biopsy if high risk"},{"key":"rv16","label":"Month 15","offset":456,"grace":30,"tests":"Routine panel + tacrolimus trough"},{"key":"rv17","label":"Month 18","offset":547,"grace":30,"tests":"Routine panel + tacrolimus trough"},{"key":"rv18","label":"Month 21","offset":638,"grace":30,"tests":"Routine panel + tacrolimus trough"},{"key":"rv19","label":"Month 24","offset":730,"grace":30,"tests":"DSA (annual); end of BK surveillance; annual comprehensive review"},{"key":"rv20","label":"Month 30","offset":913,"grace":45,"tests":"Routine panel"},{"key":"rv21","label":"Year 3","offset":1095,"grace":45,"tests":"DSA (annual); annual comprehensive review; bone density (2-yearly)"},{"key":"rv22","label":"Year 4","offset":1460,"grace":60,"tests":"DSA (annual); annual comprehensive review"},{"key":"rv23","label":"Year 5","offset":1826,"grace":60,"tests":"DSA (annual); annual comprehensive review; bone density (2-yearly)"},{"key":"rv24","label":"Year 6","offset":2191,"grace":60,"tests":"Annual review — minimum every 6 months for life thereafter"},{"key":"rv25","label":"Year 7","offset":2556,"grace":60,"tests":"Annual review"},{"key":"rv26","label":"Year 8","offset":2922,"grace":60,"tests":"Annual review"},{"key":"rv27","label":"Year 9","offset":3287,"grace":60,"tests":"Annual review"},{"key":"rv28","label":"Year 10","offset":3652,"grace":60,"tests":"Annual review"},{"section":"Scheduled Surveillance Tests (§G8.3) — record the date each is performed"},{"key":"rv29","label":"DSA — month 3","offset":91,"grace":14,"tests":"Donor-specific antibody"},{"key":"rv30","label":"DSA — month 6","offset":182,"grace":14,"tests":"Donor-specific antibody"},{"key":"rv31","label":"DSA — month 12","offset":365,"grace":21,"tests":"Donor-specific antibody, then annually"},{"key":"rv32","label":"BK PCR — month 1","offset":30,"grace":7,"tests":"Plasma BK virus PCR (monthly to month 6)"},{"key":"rv33","label":"BK PCR — month 2","offset":61,"grace":7,"tests":"Plasma BK virus PCR"},{"key":"rv34","label":"BK PCR — month 3","offset":91,"grace":7,"tests":"Plasma BK virus PCR"},{"key":"rv35","label":"BK PCR — month 4","offset":121,"grace":7,"tests":"Plasma BK virus PCR"},{"key":"rv36","label":"BK PCR — month 5","offset":152,"grace":7,"tests":"Plasma BK virus PCR"},{"key":"rv37","label":"BK PCR — month 6","offset":182,"grace":7,"tests":"Plasma BK virus PCR"},{"key":"rv38","label":"BK PCR — month 9","offset":273,"grace":14,"tests":"Plasma BK virus PCR (3-monthly to month 24)"},{"key":"rv39","label":"BK PCR — month 12","offset":365,"grace":14,"tests":"Plasma BK virus PCR"},{"key":"rv40","label":"BK PCR — month 15","offset":456,"grace":14,"tests":"Plasma BK virus PCR"},{"key":"rv41","label":"BK PCR — month 18","offset":547,"grace":14,"tests":"Plasma BK virus PCR"},{"key":"rv42","label":"BK PCR — month 21","offset":638,"grace":14,"tests":"Plasma BK virus PCR"},{"key":"rv43","label":"BK PCR — month 24","offset":730,"grace":14,"tests":"Plasma BK virus PCR — surveillance ends"},{"key":"rv44","label":"CMV — end of prophylaxis review","offset":182,"grace":14,"tests":"D+/R−: stop valganciclovir at 6 months and begin 1–2 weekly PCR for 3 months"},{"key":"rv45","label":"CMV PCR surveillance complete","offset":273,"grace":21,"tests":"D+/R−: 3 months of post-prophylaxis PCR completed"},{"key":"rv46","label":"EBV DNA — if D+/R− only","offset":30,"grace":7,"tests":"Monthly to month 6, then 3-monthly to month 12 (§G8.3)"},{"key":"rv47","label":"UPCR — month 3","offset":91,"grace":14,"tests":"Urine protein-to-creatinine ratio"},{"key":"rv48","label":"UPCR — month 6","offset":182,"grace":14,"tests":"Urine protein-to-creatinine ratio"},{"key":"rv49","label":"UPCR — month 9","offset":273,"grace":14,"tests":"Urine protein-to-creatinine ratio"},{"key":"rv50","label":"UPCR — month 12","offset":365,"grace":14,"tests":"Urine protein-to-creatinine ratio, then annually"},{"key":"rv51","label":"Annual comprehensive review — year 1","offset":365,"grace":30,"tests":"Cardiovascular risk, bone health, cancer screening, vaccination, dental, psychosocial (§G8.5)"},{"key":"rv52","label":"Annual comprehensive review — year 2","offset":730,"grace":30,"tests":"As §G8.5"},{"key":"rv53","label":"Annual comprehensive review — year 3","offset":1095,"grace":30,"tests":"As §G8.5"},{"key":"rv54","label":"Annual comprehensive review — year 4","offset":1460,"grace":30,"tests":"As §G8.5"},{"key":"rv55","label":"Annual comprehensive review — year 5","offset":1826,"grace":30,"tests":"As §G8.5"}],"donorVisits":[{"key":"dv1","label":"3–7 days after discharge","offset":5,"grace":4,"tests":"Wound review, pain, return of function — creatinine, CBC, electrolytes"},{"key":"dv2","label":"1 month","offset":30,"grace":10,"tests":"Recovery, return-to-work planning, psychological wellbeing — creatinine/eGFR, urinalysis, BP"},{"key":"dv3","label":"3 months","offset":91,"grace":14,"tests":"Creatinine/eGFR, UPCR, blood pressure, weight"},{"key":"dv4","label":"6 months","offset":182,"grace":21,"tests":"Creatinine/eGFR, urinalysis, blood pressure"},{"key":"dv5","label":"12 months","offset":365,"grace":30,"tests":"Creatinine/eGFR, UPCR, fasting glucose, lipids, blood pressure, BMI"},{"key":"dv6","label":"Year 2","offset":730,"grace":60,"tests":"Annual: creatinine/eGFR, UPCR, BP, weight, fasting glucose"},{"key":"dv7","label":"Year 3","offset":1095,"grace":60,"tests":"Annual health check"},{"key":"dv8","label":"Year 4","offset":1460,"grace":60,"tests":"Annual health check"},{"key":"dv9","label":"Year 5","offset":1826,"grace":60,"tests":"Annual health check"},{"key":"dv10","label":"Year 6","offset":2191,"grace":60,"tests":"Annual health check"},{"key":"dv11","label":"Year 7","offset":2556,"grace":60,"tests":"Annual health check"},{"key":"dv12","label":"Year 8","offset":2922,"grace":60,"tests":"Annual health check"},{"key":"dv13","label":"Year 9","offset":3287,"grace":60,"tests":"Annual health check"},{"key":"dv14","label":"Year 10","offset":3652,"grace":60,"tests":"Annual health check"},{"key":"dv15","label":"Year 11","offset":4017,"grace":60,"tests":"Annual health check"},{"key":"dv16","label":"Year 12","offset":4383,"grace":60,"tests":"Annual health check"},{"key":"dv17","label":"Year 13","offset":4748,"grace":60,"tests":"Annual health check"},{"key":"dv18","label":"Year 14","offset":5113,"grace":60,"tests":"Annual health check"},{"key":"dv19","label":"Year 15","offset":5478,"grace":60,"tests":"Annual health check — follow-up continues for life"}],"recipCols":["Creatinine / eGFR","Tacrolimus trough"],"donorCols":["Creatinine / eGFR","UPCR","Blood pressure","Weight"]};
 </script>
 <script>
