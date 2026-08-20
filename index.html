@@ -351,10 +351,26 @@ const filters = { donor: 'all', recipient: 'all' };
 const search = { donor: '', recipient: '' };
 
 /* ---------------------------------------------------------- cloud config */
+/* ============================================================================
+   SHARED DEFAULTS — fill these in ONCE and every visitor to the live link
+   gets them automatically, no per-device Settings step needed.
+   Paste your values between the quotes below, then re-upload this file.
+   Anyone can still override these in their own Settings panel if they want
+   to point at a different sheet/EmailJS account, but by default everyone
+   who opens the page gets exactly what's set here.
+   ============================================================================ */
+const DEFAULT_CFG = {
+  gasUrl: 'https://script.google.com/macros/s/AKfycbyXbcWDntyQ8pIY7FjY0DH6o74_NfPCYSuHX8P7pKWdQFuhsy8iQtxyiZpN-FgOdLbBuw/exec',
+  emailjsService: '',   // e.g. 'service_ab12cd3'
+  emailjsTemplate: '',  // e.g. 'template_xy456z'
+  emailjsPublicKey: '', // your EmailJS public key
+  password: '',         // shared password (1–6 digits), or leave blank for none
+};
+/* ============================================================================ */
 const CFG_KEY = 'nnuh_tracker_cfg_v1';
 const loadCfg = () => {
-  try { return Object.assign({ gasUrl: '', emailjsService: '', emailjsTemplate: '', emailjsPublicKey: '', password: '' }, JSON.parse(localStorage.getItem(CFG_KEY) || '{}')); }
-  catch { return { gasUrl: '', emailjsService: '', emailjsTemplate: '', emailjsPublicKey: '', password: '' }; }
+  try { return Object.assign({}, DEFAULT_CFG, JSON.parse(localStorage.getItem(CFG_KEY) || '{}')); }
+  catch { return Object.assign({}, DEFAULT_CFG); }
 };
 let CFG = loadCfg();
 const saveCfg = () => { localStorage.setItem(CFG_KEY, JSON.stringify(CFG)); syncCloudPill(); };
@@ -1475,7 +1491,7 @@ function openSettingsForm() {
   const back = el('div', { class: 'modal-back' });
   const m = el('div', { class: 'modal' });
   m.appendChild(el('h2', { text: 'Settings' }));
-  m.appendChild(el('p', { class: 'sub', text: 'Stored only in this browser. See the Code.gs setup comments for how to get the Apps Script URL and EmailJS IDs.' }));
+  m.appendChild(el('p', { class: 'sub', text: 'These fields are pre-filled with the shared defaults built into this page. Changes here only affect this browser \u2014 to change what everyone gets by default, edit DEFAULT_CFG in the file itself.' }));
   const grid = el('div', { class: 'form-grid' });
   const tmp = Object.assign({}, CFG);
   const f = (label, key, ph) => {
@@ -1539,11 +1555,19 @@ function openSettingsForm() {
   m.appendChild(backupNote);
 
   const actions = el('div', { class: 'modal-actions' });
+  const resetBtn = el('button', { class: 'btn btn-ghost', text: 'Reset to shared defaults' });
+  resetBtn.addEventListener('click', () => {
+    localStorage.removeItem(CFG_KEY);
+    CFG = Object.assign({}, DEFAULT_CFG);
+    back.remove();
+    toast('Reset to the shared defaults built into this page.');
+    if (activeTab === 'registry') render();
+  });
   const cancel = el('button', { class: 'btn btn-ghost', text: 'Close' });
   cancel.addEventListener('click', () => back.remove());
   const save = el('button', { class: 'btn', text: 'Save settings' });
   save.addEventListener('click', () => { CFG = tmp; saveCfg(); back.remove(); toast('Settings saved.'); if (activeTab === 'registry') render(); });
-  actions.append(cancel, save);
+  actions.append(resetBtn, cancel, save);
   m.appendChild(actions);
 
   back.appendChild(m);
