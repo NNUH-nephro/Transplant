@@ -361,10 +361,10 @@ const search = { donor: '', recipient: '' };
    ============================================================================ */
 const DEFAULT_CFG = {
   gasUrl: 'https://script.google.com/macros/s/AKfycbyXbcWDntyQ8pIY7FjY0DH6o74_NfPCYSuHX8P7pKWdQFuhsy8iQtxyiZpN-FgOdLbBuw/exec',
-  emailjsService: '',   // e.g. 'service_ab12cd3'
-  emailjsTemplate: '',  // e.g. 'template_xy456z'
-  emailjsPublicKey: '', // your EmailJS public key
-  password: '',         // shared password (1–6 digits), or leave blank for none
+  emailjsService: 'service_2a6tr2s',
+  emailjsTemplate: 'template_2ama0o7',
+  emailjsPublicKey: 'M-kqZPk--hTzMnHt7',
+  password: '112233',
 };
 /* ============================================================================ */
 const CFG_KEY = 'nnuh_tracker_cfg_v1';
@@ -380,8 +380,7 @@ let registryCache = [];
 let registryQuery = '';
 let registryLoading = false;
 let registryView = 'home'; // 'home' | 'register' | 'browse'
-let registryUnlocked = false;
-let settingsUnlocked = false;
+let appUnlocked = false;
 let navHistory = [];
 let lastNavState = null;
 let suppressHistory = false;
@@ -478,6 +477,18 @@ const app = () => document.getElementById('app');
 function render() {
   const root = app();
   root.innerHTML = '';
+  // Password required for Registry (Register + View donors & recipients) only.
+  // Settings stays open via its own button; checklist tabs stay open once
+  // you're already past Registry. CFG.password is shared to everyone via
+  // DEFAULT_CFG, so this is the same password for every visitor.
+  if (CFG.password && !appUnlocked && activeTab === 'registry') {
+    document.querySelector('.tabs').style.display = 'none';
+    updatePatientBanner(false);
+    const caseActionsEl = document.getElementById('caseActions');
+    if (caseActionsEl) caseActionsEl.className = 'case-actions off';
+    root.appendChild(renderAppLock());
+    return;
+  }
   if (!suppressHistory && lastNavState && (lastNavState.activeTab !== activeTab || lastNavState.registryView !== registryView)) {
     navHistory.push(lastNavState);
     if (navHistory.length > 50) navHistory.shift();
@@ -539,6 +550,28 @@ function pinInput(placeholder) {
     inputmode: 'numeric', maxlength: '6' });
   i.addEventListener('input', () => { i.value = i.value.replace(/\D/g, '').slice(0, 6); });
   return i;
+}
+
+function renderAppLock() {
+  const wrap = el('div', { class: 'stack' });
+  const hero = el('section', { class: 'reg-hero' });
+  hero.appendChild(el('h2', { text: 'NNUH Kidney Transplant Program' }));
+  hero.appendChild(el('p', { text: 'Enter the password to continue.' }));
+  wrap.appendChild(hero);
+  const lock = card('Password required', null);
+  const row = el('div', { class: 'toolbar' });
+  const pwInput = pinInput();
+  const go = () => {
+    if (pwInput.value === CFG.password) { appUnlocked = true; render(); }
+    else toast('Incorrect password.', true);
+  };
+  pwInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+  const btn = el('button', { class: 'btn', text: 'Unlock' });
+  btn.addEventListener('click', go);
+  row.append(pwInput, btn);
+  lock.appendChild(row);
+  wrap.appendChild(lock);
+  return wrap;
 }
 
 
@@ -648,25 +681,8 @@ function renderRegisterForm() {
 function renderRegistryBrowse() {
   const wrap = el('div', { class: 'stack' });
   const back = el('button', { class: 'btn btn-ghost', text: '\u2190 Back' });
-  back.addEventListener('click', () => { registryView = 'home'; registryUnlocked = false; render(); });
+  back.addEventListener('click', () => { registryView = 'home'; render(); });
   wrap.appendChild(back);
-
-  if (CFG.password && !registryUnlocked) {
-    const lock = card('Enter password to view donors & recipients', 'This list holds every registered donor and recipient.');
-    const row = el('div', { class: 'toolbar' });
-    const pwInput = pinInput();
-    const go = () => {
-      if (pwInput.value === CFG.password) { registryUnlocked = true; render(); }
-      else toast('Incorrect password.', true);
-    };
-    pwInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
-    const btn = el('button', { class: 'btn', text: 'Unlock' });
-    btn.addEventListener('click', go);
-    row.append(pwInput, btn);
-    lock.appendChild(row);
-    wrap.appendChild(lock);
-    return wrap;
-  }
 
   // sub-tabs: donor / recipient
   const subTabs = el('div', { class: 'segmented' });
@@ -1031,12 +1047,17 @@ function itemRow(it, which) {
 
   const na = el('label', { class: 'na' }, [
     (() => {
-      const cb = el('input', { type: 'checkbox' });
-      cb.checked = !!st.na;
-      cb.addEventListener('change', (e) => { st.na = e.target.checked; if (st.na) { st.ordered = ''; st.completed = ''; } markDirty(); render(); });
-      return cb;
+      const sel = el('select');
+      sel.appendChild(el('option', { value: 'no', text: 'Applicable' }));
+      sel.appendChild(el('option', { value: 'yes', text: 'N/A' }));
+      sel.value = st.na ? 'yes' : 'no';
+      sel.addEventListener('change', (e) => {
+        st.na = e.target.value === 'yes';
+        if (st.na) { st.ordered = ''; st.completed = ''; }
+        markDirty(); render();
+      });
+      return sel;
     })(),
-    el('span', { text: 'N/A' }),
   ]);
   ctl.appendChild(na);
   row.appendChild(ctl);
@@ -1461,18 +1482,18 @@ function toast(msg, bad) {
 
 /* ------------------------------------------------------------- wiring */
 function openSettings() {
-  if (CFG.password && !settingsUnlocked) { openSettingsGate(); return; }
+  if (CFG.password && !appUnlocked) { openAppLockModal(openSettingsForm); return; }
   openSettingsForm();
 }
-function openSettingsGate() {
+function openAppLockModal(onSuccess) {
   const back = el('div', { class: 'modal-back' });
   const m = el('div', { class: 'modal' });
-  m.appendChild(el('h2', { text: 'Settings password' }));
-  m.appendChild(el('p', { class: 'sub', text: 'Enter the settings password to continue.' }));
+  m.appendChild(el('h2', { text: 'Password required' }));
+  m.appendChild(el('p', { class: 'sub', text: 'Enter the password to continue.' }));
   const row = el('div', { class: 'toolbar' });
   const pwInput = pinInput();
   const go = () => {
-    if (pwInput.value === CFG.password) { settingsUnlocked = true; back.remove(); openSettingsForm(); }
+    if (pwInput.value === CFG.password) { appUnlocked = true; back.remove(); onSuccess(); }
     else toast('Incorrect password.', true);
   };
   pwInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
@@ -1509,7 +1530,7 @@ function openSettingsForm() {
     f('EmailJS Service ID', 'emailjsService'),
     f('EmailJS Template ID', 'emailjsTemplate'),
     f('EmailJS Public Key', 'emailjsPublicKey'),
-    fPin('Password (required to view donors/recipients and to open Settings)', 'password'),
+    fPin('Password (required to enter Registry, view donors/recipients, and open Settings)', 'password'),
   );
   m.appendChild(grid);
 
@@ -1577,11 +1598,11 @@ function openSettingsForm() {
 
 function init() {
   document.getElementById('btnBack').addEventListener('click', goBack);
-  document.getElementById('btnHome').addEventListener('click', () => { activeTab = 'registry'; registryView = 'home'; registryUnlocked = false; render(); });
-  document.getElementById('btnSwitch').addEventListener('click', () => { activeTab = 'registry'; registryView = 'browse'; registryUnlocked = false; render(); });
+  document.getElementById('btnHome').addEventListener('click', () => { activeTab = 'registry'; registryView = 'home'; render(); });
+  document.getElementById('btnSwitch').addEventListener('click', () => { activeTab = 'registry'; registryView = 'browse'; render(); });
   document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => {
     activeTab = t.dataset.tab;
-    if (activeTab === 'registry') { registryView = 'home'; registryUnlocked = false; }
+    if (activeTab === 'registry') { registryView = 'home'; }
     render();
   }));
   document.getElementById('btnRemind').addEventListener('click', sendReminder);
