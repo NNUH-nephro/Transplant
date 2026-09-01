@@ -369,8 +369,15 @@ const DEFAULT_CFG = {
 /* ============================================================================ */
 const CFG_KEY = 'nnuh_tracker_cfg_v1';
 const loadCfg = () => {
-  try { return Object.assign({}, DEFAULT_CFG, JSON.parse(localStorage.getItem(CFG_KEY) || '{}')); }
-  catch { return Object.assign({}, DEFAULT_CFG); }
+  const merged = Object.assign({}, DEFAULT_CFG);
+  try {
+    const stored = JSON.parse(localStorage.getItem(CFG_KEY) || '{}');
+    // Only let a genuinely non-empty locally-saved value override the shared
+    // default — a blank/never-configured local field must never silently
+    // shadow a working shared connection baked into the page.
+    Object.keys(stored).forEach((k) => { if (stored[k]) merged[k] = stored[k]; });
+  } catch { /* ignore corrupt local storage, fall back to shared defaults */ }
+  return merged;
 };
 let CFG = loadCfg();
 const saveCfg = () => { localStorage.setItem(CFG_KEY, JSON.stringify(CFG)); syncCloudPill(); };
