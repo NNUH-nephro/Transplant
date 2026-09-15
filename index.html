@@ -747,9 +747,9 @@ function renderRegisterForm() {
 
 function renderRegistryBrowse() {
   const wrap = el('div', { class: 'stack' });
-  const back = el('button', { class: 'btn btn-ghost', text: '\u2190 Back' });
-  back.addEventListener('click', () => { registryView = 'home'; render(); });
-  wrap.appendChild(back);
+  const home = el('button', { class: 'btn btn-ghost', text: '\u2302 Home' });
+  home.addEventListener('click', () => { registryView = 'home'; render(); });
+  wrap.appendChild(home);
 
   // sub-tabs: donor / recipient
   const subTabs = el('div', { class: 'segmented' });
@@ -1377,9 +1377,8 @@ async function cloudSave(silent) {
   syncCloudPill('busy');
   try {
     await gasUpsertCase(S);
-    try { await gasExportSheet(S.meta.caseId, buildExportRows()); } catch (e2) { /* registry row still saved even if the detail tab fails */ }
     markClean();
-    if (!silent) toast('Saved — registry row and checklist sheet both updated.');
+    if (!silent) toast('Saved to the cloud.');
   } catch (e) {
     syncCloudPill('error');
     if (!silent) toast('Could not save to the cloud — ' + e.message, true);
