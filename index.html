@@ -627,30 +627,44 @@ function renderRegistry() {
 }
 
 function renderRegistryHome() {
-  const box = el('div', { class: 'sheet-tiles', style: 'grid-template-columns:1fr 1fr 1fr 1fr' });
+  const box = el('div', { class: 'sheet-tiles', style: 'grid-template-columns:1fr 1fr 1fr' });
   const regTile = el('button', { class: 'sheet-tile' }, [
-    el('b', { text: 'Register' }),
+    el('b', { text: '\u{1F4DD} Register' }),
     el('span', { text: 'Register a new donor \u2013 recipient pair and open its checklists.' }),
   ]);
   regTile.addEventListener('click', () => { registryView = 'register'; render(); });
   const viewTile = el('button', { class: 'sheet-tile' }, [
-    el('b', { text: 'View donors & recipients' }),
+    el('b', { text: '\u{1F465} View donors & recipients' }),
     el('span', { text: 'Password-protected list of everyone registered, with search and date filter.' }),
   ]);
   viewTile.addEventListener('click', () => { registryView = 'browse'; render(); });
   const filesTile = el('button', { class: 'sheet-tile' }, [
-    el('b', { text: 'Files' }),
+    el('b', { text: '\u{1F4C1} Files' }),
     el('span', { text: 'Open the shared program files folder (Google Drive).' }),
   ]);
   filesTile.addEventListener('click', () => {
     window.open('https://drive.google.com/drive/folders/1emVGacfTxbF1aDX3K6UbrSM7e4woeHbW?usp=drive_link', '_blank');
   });
   const questTile = el('button', { class: 'sheet-tile' }, [
-    el('b', { text: 'Nurse Initial Form' }),
+    el('b', { text: '\u{1F9BA} Nurse Initial Form' }),
     el('span', { text: 'Opens the printable pre-transplant evaluation questionnaire in a new window.' }),
   ]);
   questTile.addEventListener('click', () => { registryView = 'nurseform'; render(); });
-  box.append(regTile, viewTile, filesTile, questTile);
+  const historyTile = el('button', { class: 'sheet-tile' }, [
+    el('b', { text: '\u{1F4DC} History' }),
+    el('span', { text: 'Opens the history form.' }),
+  ]);
+  historyTile.addEventListener('click', () => {
+    window.open('https://claude.ai/artifact/HKwkYC8PUKbEZAJNndKg7w', '_blank');
+  });
+  const screeningTile = el('button', { class: 'sheet-tile' }, [
+    el('b', { text: '\u{1FA7A} Screening' }),
+    el('span', { text: 'Opens the screening form.' }),
+  ]);
+  screeningTile.addEventListener('click', () => {
+    window.open('https://claude.ai/artifact/3xWKJJkmzNP76edXTMsNzr', '_blank');
+  });
+  box.append(regTile, viewTile, filesTile, questTile, historyTile, screeningTile);
   return box;
 }
 
@@ -813,7 +827,8 @@ function renderRegistryBrowse() {
       const st = CASE_STATUS[c.caseStatus || 'waiting'];
       const name = browseWho === 'donor' ? (c.donorName || 'Unnamed donor') : (c.recipientName || 'Unnamed recipient');
       const other = browseWho === 'donor' ? (c.recipientName || 'Unnamed recipient') : (c.donorName || 'Unnamed donor');
-      const pct = browseWho === 'donor' ? (c.donorProgress || 0) : (c.recipientProgress || 0);
+      const validPct = (v) => (typeof v === 'number' && v >= 0 && v <= 100) ? v : 0;
+      const pct = browseWho === 'donor' ? validPct(c.donorProgress) : validPct(c.recipientProgress);
       const row = el('div', { class: 'case-row', style: 'grid-template-columns:1fr auto auto auto' });
       row.appendChild(el('div', { class: 'who' }, [
         el('b', {}, [
