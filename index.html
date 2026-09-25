@@ -1132,6 +1132,9 @@ function renderChecklist(which) {
     fgroup.appendChild(b);
   });
   tools.appendChild(fgroup);
+  const autofillBtn = el('button', { class: 'btn btn-ghost', text: '\u{1F4C4} Autofill' });
+  autofillBtn.addEventListener('click', () => openAutofillModal(which, list, () => { render(); }));
+  tools.appendChild(autofillBtn);
   head.appendChild(tools);
   wrap.appendChild(head);
 
@@ -1472,6 +1475,9 @@ async function gasDeleteCase(caseId) {
 async function gasExportSheet(caseId, rows) {
   return gasCall('POST', null, { action: 'exportSheet', caseId, rows });
 }
+async function gasAutofillExtract(files, driveLinks, items) {
+  return gasCall('POST', null, { action: 'autofillExtract', files, driveLinks, items });
+}
 
 async function cloudSave(silent) {
   if (!cloudReady()) { if (!silent) toast('Add your Google Apps Script URL in Settings first.', true); return; }
@@ -1703,6 +1709,160 @@ function toast(msg, bad) {
   document.body.appendChild(t);
   setTimeout(() => t.classList.add('show'), 10);
   setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3200);
+}
+
+/* ---------------------------------------------------- autofill from file */
+function openAutofillModal(which, list, onApplied) {
+  const back = el('div', { class: 'modal-back' });
+  const m = el('div', { class: 'modal' });
+  m.appendChild(el('h2', { text: '\u{1F4C4} Autofill' }));
+  m.appendChild(el('p', { class: 'sub', text: 'Upload one or more lab/imaging reports (PDF, photo or scan), and/or paste Google Drive links to them. An AI reads them together and proposes values for outstanding checklist items — nothing is written until you review and apply.' }));
+
+  const fileInput = el('input', { type: 'file', accept: 'application/pdf,image/*', multiple: true });
+  const fileList = el('div', { class: 'muted-note' });
+  const refreshFileList = () => {
+    const names = Array.from(fileInput.files || []).map((f) => f.name);
+    fileList.textContent = names.length ? `${names.length} file(s) selected: ${names.join(', ')}` : 'No files selected yet.';
+  };
+  fileInput.addEventListener('change', refreshFileList);
+  refreshFileList();
+  m.appendChild(el('div', { class: 'form-grid' }, [el('label', { class: 'field' }, [el('span', { text: 'Report file(s) — select multiple at once' }), fileInput, fileList])]));
+
+  const driveInput = el('textarea', { rows: 3, placeholder: 'One Google Drive link per line (optional) — each file must be shared with the Google account this Apps Script runs as.', style: 'width:100%;font:inherit' });
+  m.appendChild(el('div', { class: 'form-grid' }, [el('label', { class: 'field' }, [el('span', { text: 'Or Google Drive link(s)' }), driveInput])]));
+
+  const status = el('p', { class: 'muted-note' });
+  m.appendChild(status);
+
+  const runRow = el('div', { class: 'toolbar' });
+  const runBtn = el('button', { class: 'btn', text: 'Read files' });
+  runRow.appendChild(runBtn);
+  m.appendChild(runRow);
+
+  const previewBox = el('div');
+  m.appendChild(previewBox);
+
+  const closeBtn = el('button', { class: 'btn btn-ghost', text: 'Close', style: 'margin-top:14px' });
+  closeBtn.addEventListener('click', () => back.remove());
+  m.appendChild(closeBtn);
+
+  back.appendChild(m);
+  back.addEventListener('click', (e) => { if (e.target === back) back.remove(); });
+  document.getElementById('modalRoot').appendChild(back);
+
+  runBtn.addEventListener('click', async () => {
+    const localFiles = Array.from(fileInput.files || []);
+    const driveLinks = driveInput.value.split('\n').map((s) => s.trim()).filter(Boolean);
+    if (!localFiles.length && !driveLinks.length) { toast('Choose at least one file, or paste a Drive link.', true); return; }
+
+    const totalSize = localFiles.reduce((sum, f) => sum + f.size, 0);
+    if (totalSize > 30 * 1024 * 1024) { toast('Those files together are quite large (>30MB) — try fewer pages or files at a time.', true); return; }
+    const oversized = localFiles.find((f) => f.size > 15 * 1024 * 1024);
+    if (oversized) { toast(`"${oversized.name}" is over 15MB on its own — try a smaller scan.`, true); return; }
+
+    const outstanding = list.filter((it) => {
+      if (it.group) return false;
+      const st = itemState(it.key);
+      const s = statusOf(st);
+      return s !== 'complete' && s !== 'na';
+    }).map((it) => ({ key: it.key, text: it.text, components: it.components || undefined, answerType: it.answerType || undefined }));
+
+    if (!outstanding.length) { toast('Everything on this checklist is already complete or N/A.', true); return; }
+
+    status.textContent = 'Reading file(s)…';
+    runBtn.disabled = true;
+    previewBox.innerHTML = '';
+    try {
+      const filesPayload = await Promise.all(localFiles.map((file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve({
+          name: file.name,
+          mimeType: file.type || 'application/pdf',
+          base64: String(reader.result).split(',')[1] || '',
+        });
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      })));
+
+      status.textContent = 'Matching against ' + outstanding.length + ' outstanding item(s)…';
+      const res = await gasAutofillExtract(filesPayload, driveLinks, outstanding);
+      const matches = (res && res.matches) || [];
+      const fileErrors = (res && res.fileErrors) || [];
+      const sourceLabel = [...localFiles.map((f) => f.name), ...driveLinks.map(() => 'Drive file')].join(', ') || 'uploaded file(s)';
+      const warnPrefix = fileErrors.length ? fileErrors.join(' ') + ' ' : '';
+      if (!matches.length) {
+        status.textContent = warnPrefix + 'No matching values found for the outstanding items.';
+        runBtn.disabled = false;
+        return;
+      }
+      status.textContent = warnPrefix + matches.length + ' item(s) found — review below, then apply:';
+      renderPreview(matches, list, which, sourceLabel, previewBox, () => { back.remove(); onApplied(); });
+    } catch (e) {
+      status.textContent = 'Could not read these files: ' + e.message;
+    } finally {
+      runBtn.disabled = false;
+    }
+  });
+}
+
+function renderPreview(matches, list, which, fileName, previewBox, onApply) {
+  previewBox.innerHTML = '';
+  const rows = [];
+  matches.forEach((match) => {
+    const it = list.find((x) => !x.group && x.key === match.key);
+    if (!it) return;
+    let valueLabel = '';
+    if (it.components && it.components.length && match.components && match.components.length) {
+      valueLabel = match.components.map((c) => `${c.label}: ${c.value}`).join(', ');
+    } else if (it.answerType === 'yesno' && match.answer) {
+      valueLabel = match.answer;
+    } else if (match.result) {
+      valueLabel = match.result;
+    }
+    if (!valueLabel) return;
+    const rowEl = el('label', { class: 'field', style: 'display:flex;align-items:flex-start;gap:8px;border-bottom:1px solid var(--border,#e2e2e2);padding:6px 0' });
+    const cb = el('input', { type: 'checkbox' });
+    cb.checked = true;
+    const textBox = el('div', {}, [
+      el('div', { text: it.text, style: 'font-weight:600' }),
+      el('div', { class: 'muted-note', text: valueLabel }),
+      match.notes ? el('div', { class: 'muted-note', text: match.notes, style: 'font-style:italic' }) : null,
+    ].filter(Boolean));
+    rowEl.append(cb, textBox);
+    previewBox.appendChild(rowEl);
+    rows.push({ cb, match, it });
+  });
+  if (!rows.length) {
+    previewBox.appendChild(el('p', { class: 'muted-note', text: 'The AI did not return usable values for any outstanding item.' }));
+    return;
+  }
+  const applyBtn = el('button', { class: 'btn', text: 'Apply selected', style: 'margin-top:10px' });
+  applyBtn.addEventListener('click', () => {
+    let applied = 0;
+    const tag = `[Autofilled from ${fileName}]`;
+    rows.forEach(({ cb, match, it }) => {
+      if (!cb.checked) return;
+      const st = itemState(it.key);
+      if (it.components && it.components.length && match.components && match.components.length) {
+        st.values = st.values || {};
+        match.components.forEach((c) => {
+          const idx = it.components.findIndex((comp) => comp.toLowerCase() === String(c.label || '').toLowerCase());
+          if (idx > -1) st.values[it.components[idx]] = c.value;
+        });
+      } else if (it.answerType === 'yesno' && match.answer) {
+        st.result = /^y/i.test(match.answer) ? 'Yes' : (/^n/i.test(match.answer) ? 'No' : st.result);
+      } else if (match.result) {
+        st.result = match.result;
+      }
+      if (!st.completed) { st.na = false; if (!st.ordered) st.ordered = iso(TODAY()); }
+      if (!(st.notes || '').includes(tag)) st.notes = (st.notes ? st.notes + ' ' : '') + tag;
+      applied += 1;
+    });
+    markDirty();
+    toast(`Autofilled ${applied} item(s) as Pending — review and mark Complete.`);
+    onApply();
+  });
+  previewBox.appendChild(applyBtn);
 }
 
 /* ------------------------------------------------------------- wiring */
