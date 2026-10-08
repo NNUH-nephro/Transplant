@@ -626,10 +626,10 @@ function renderRegistry() {
   if (registryView === 'register') { wrap.appendChild(renderRegisterForm()); return wrap; }
   if (registryView === 'nurseform') { wrap.appendChild(renderNurseFormInline()); return wrap; }
   if (registryView === 'historymenu') { wrap.appendChild(renderHistoryMenu()); return wrap; }
-  if (registryView === 'rechistory') { wrap.appendChild(renderIframeFormInline('Recipient History & Examination', RECIPIENT_HISTORY_HTML, 'recipientHistFrame', false)); return wrap; }
-  if (registryView === 'donorhistory') { wrap.appendChild(renderIframeFormInline('Donor History & Examination', DONOR_HISTORY_HTML, 'donorHistFrame', false)); return wrap; }
-  if (registryView === 'rechistoryview') { wrap.appendChild(renderIframeFormInline('View Recipient History', RECIPIENT_HISTORY_HTML, 'recipientHistFrameView', true)); return wrap; }
-  if (registryView === 'donorhistoryview') { wrap.appendChild(renderIframeFormInline('View Donor History', DONOR_HISTORY_HTML, 'donorHistFrameView', true)); return wrap; }
+  if (registryView === 'rechistory') { wrap.appendChild(renderIframeFormInline('Recipient History & Examination', RECIPIENT_HISTORY_HTML, 'recipientHistFrame', false, 'krt-hp-v1')); return wrap; }
+  if (registryView === 'donorhistory') { wrap.appendChild(renderIframeFormInline('Donor History & Examination', DONOR_HISTORY_HTML, 'donorHistFrame', false, 'krt-donor-v1')); return wrap; }
+  if (registryView === 'rechistoryview') { wrap.appendChild(renderIframeFormInline('View Recipient History', RECIPIENT_HISTORY_HTML, 'recipientHistFrameView', true, 'krt-hp-v1')); return wrap; }
+  if (registryView === 'donorhistoryview') { wrap.appendChild(renderIframeFormInline('View Donor History', DONOR_HISTORY_HTML, 'donorHistFrameView', true, 'krt-donor-v1')); return wrap; }
   if (registryView === 'orderset') { wrap.appendChild(renderIframeFormInline('Order Set', ORDER_SET_HTML, 'orderSetFrame', false)); return wrap; }
   wrap.appendChild(renderRegistryBrowse());
   return wrap;
@@ -744,7 +744,93 @@ function renderNurseFormInline() {
 // code you type into it) to this browser's storage via its own Save button
 // and "Saved on this device" list — that is independent of this app's cloud
 // sync, so it stays on this device/browser unless printed or copied out.
-function renderIframeFormInline(title, htmlSrc, frameId, startNote) {
+/* ---- History forms: sync their saved records through the Google Sheet ---- */
+const HIST_SYNC_KEY = 'krt-hist-synced';
+function histSyncedLoad() { try { return JSON.parse(localStorage.getItem(HIST_SYNC_KEY) || '{}'); } catch (e) { return {}; } }
+function histSyncedSave(o) { try { localStorage.setItem(HIST_SYNC_KEY, JSON.stringify(o)); } catch (e) {} }
+function histLocalLoad(k) { try { const v = JSON.parse(localStorage.getItem(k) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
+function histPush(storeKey, recs) {
+  return gasCall('POST', null, {
+    action: 'historyUpsert', store: storeKey,
+    records: recs.map(r => ({ code: r.code, updatedAt: r.ts || '', json: JSON.stringify(r) }))
+  });
+}
+function histDelete(storeKey, code) {
+  return gasCall('POST', null, { action: 'historyDelete', store: storeKey, code });
+}
+// Pull the sheet's copy, merge it with this device's copy (newest wins, deletions made
+// on another device are honoured) and leave the result in localStorage before the form loads.
+async function histPull(storeKey) {
+  const data = await gasCall('GET', { action: 'historyList', store: storeKey });
+  const server = new Map();
+  (data.records || []).forEach(r => {
+    try { const rec = JSON.parse(r.json); rec.ts = rec.ts || r.updatedAt || ''; server.set(String(r.code), rec); } catch (e) {}
+  });
+  const local = histLocalLoad(storeKey);
+  const synced = histSyncedLoad();
+  const syncedSet = new Set(synced[storeKey] || []);
+  const merged = [], toPush = [], seen = new Set();
+  local.forEach(l => {
+    seen.add(String(l.code));
+    const s = server.get(String(l.code));
+    if (s) {
+      if ((l.ts || '') > (s.ts || '')) { merged.push(l); toPush.push(l); } else merged.push(s);
+    } else if (syncedSet.has(String(l.code))) {
+      /* deleted on another device — drop it here too */
+    } else {
+      if (!l.ts) l.ts = new Date().toISOString();
+      merged.push(l); toPush.push(l);
+    }
+  });
+  server.forEach((s, code) => { if (!seen.has(code)) merged.push(s); });
+  merged.sort((a, b) => String(b.ts || '').localeCompare(String(a.ts || '')));
+  try { localStorage.setItem(storeKey, JSON.stringify(merged)); } catch (e) {}
+  if (toPush.length) await histPush(storeKey, toPush);
+  synced[storeKey] = merged.map(r => String(r.code));
+  histSyncedSave(synced);
+  return merged.length;
+}
+// After the form loads: stamp each save with a time and mirror saves/deletes to the sheet.
+function histHook(frame, storeKey, setStatus) {
+  const w = frame.contentWindow;
+  if (!w || !w.Storage) return;
+  const orig = w.Storage.prototype.setItem;
+  const plain = r => { const c = Object.assign({}, r); delete c.ts; return JSON.stringify(c); };
+  let prev = new Map(histLocalLoad(storeKey).map(r => [String(r.code), plain(r)]));
+  w.Storage.prototype.setItem = function (k, v) {
+    if (k !== storeKey) return orig.call(this, k, v);
+    let arr;
+    try { arr = JSON.parse(v); } catch (e) { return orig.call(this, k, v); }
+    if (!Array.isArray(arr)) return orig.call(this, k, v);
+    const now = new Date().toISOString();
+    const changed = [], cur = new Set(), next = new Map();
+    arr.forEach(r => {
+      const code = String(r.code);
+      cur.add(code);
+      const pj = plain(r);
+      if (prev.get(code) !== pj || !r.ts) { r.ts = now; changed.push(r); }
+      next.set(code, pj);
+    });
+    const removed = [...prev.keys()].filter(c => !cur.has(c));
+    prev = next;
+    const out = orig.call(this, k, JSON.stringify(arr));
+    if (cloudReady() && (changed.length || removed.length)) {
+      setStatus('Syncing…');
+      const jobs = [];
+      if (changed.length) jobs.push(histPush(storeKey, changed));
+      removed.forEach(c => jobs.push(histDelete(storeKey, c)));
+      Promise.all(jobs).then(() => {
+        const sy = histSyncedLoad();
+        sy[storeKey] = arr.map(r => String(r.code));
+        histSyncedSave(sy);
+        setStatus('Synced to your Google Sheet ✓');
+      }).catch(err => setStatus('Saved on this device only — sync failed: ' + (err && err.message ? err.message : err)));
+    }
+    return out;
+  };
+}
+
+function renderIframeFormInline(title, htmlSrc, frameId, startNote, storeKey) {
   const wrap = el('div', { class: 'stack' });
   const back = el('button', { class: 'btn btn-ghost', text: '← Back' });
   back.addEventListener('click', () => { registryView = 'historymenu'; render(); });
@@ -752,11 +838,16 @@ function renderIframeFormInline(title, htmlSrc, frameId, startNote) {
 
   const head = card(title, startNote
     ? 'Opens straight to the generated note. Pick a saved record from the list at the bottom of the note to load it.'
-    : 'Fill it in below, use its own Save button to keep a copy on this device (kept by the code you enter), and Print or Copy the generated note when done.');
+    : 'Fill it in below, use its own Save button to keep it (kept by the code you enter, and synced to your Google Sheet so it shows on your other devices), and Print or Copy the generated note when done.');
   const tools = el('div', { class: 'toolbar' });
   const printBtn = el('button', { class: 'btn btn-ghost', text: 'Print' });
+  const syncBtn = el('button', { class: 'btn btn-ghost', text: '↻ Sync' });
   tools.append(printBtn);
+  if (storeKey) tools.append(syncBtn);
   head.appendChild(tools);
+  const statusEl = el('p', { class: 'muted-note', text: '' });
+  head.appendChild(statusEl);
+  const setStatus = t => { statusEl.textContent = t; };
   wrap.appendChild(head);
 
   const frame = document.createElement('iframe');
@@ -768,19 +859,30 @@ function renderIframeFormInline(title, htmlSrc, frameId, startNote) {
   printBtn.addEventListener('click', () => {
     try { frame.contentWindow.focus(); frame.contentWindow.print(); } catch (e) { window.print(); }
   });
+  syncBtn.addEventListener('click', () => { render(); });
 
-  if (startNote) {
-    frame.addEventListener('load', () => {
-      try {
-        const w = frame.contentWindow;
-        if (w && typeof w.render === 'function') { w.cur = '__note'; w.render(); }
-      } catch (e) { /* ignore — form still usable from its own nav */ }
-    });
-  }
+  frame.addEventListener('load', () => {
+    try {
+      const w = frame.contentWindow;
+      if (storeKey) histHook(frame, storeKey, setStatus);
+      if (startNote && w && typeof w.render === 'function') { w.cur = '__note'; w.render(); }
+    } catch (e) { /* ignore — form still usable from its own nav */ }
+  });
 
   // Set via the DOM property (not the srcdoc attribute string) so none of
   // the form's own markup needs re-escaping.
-  frame.srcdoc = htmlSrc;
+  const finalSrc = String(htmlSrc).replace(/Saved on this device/g, 'Saved');
+  if (storeKey && cloudReady()) {
+    setStatus('Syncing saved histories…');
+    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timed out')), 12000));
+    Promise.race([histPull(storeKey), timeout])
+      .then(n => setStatus(n ? `Synced — ${n} saved record${n === 1 ? '' : 's'} on your Google Sheet ✓` : 'Synced — no saved records yet.'))
+      .catch(err => setStatus('Could not reach your Google Sheet (' + (err && err.message ? err.message : err) + ') — showing what is on this device.'))
+      .finally(() => { frame.srcdoc = finalSrc; });
+  } else {
+    if (storeKey) setStatus('Not connected to Google Sheets — saved on this device only.');
+    frame.srcdoc = finalSrc;
+  }
 
   return wrap;
 }
