@@ -830,6 +830,28 @@ function histHook(frame, storeKey, setStatus) {
   };
 }
 
+/* Save a generated PDF/HTML: download to this device AND store a copy in Google Drive
+   (through the Apps Script backend) when Google Sheets/Drive is connected. */
+window.__histDownload = async function (filename, data) {
+  const isPdf = /\.pdf$/i.test(filename), isHtml = /\.html?$/i.test(filename);
+  const mime = isPdf ? 'application/pdf' : isHtml ? 'text/html' : 'application/octet-stream';
+  const blob = new Blob([data], { type: mime });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  if (!cloudReady()) { toast('Saved to this device. Connect Google Sheets in Settings to also save to Drive.'); return; }
+  try {
+    const u8 = new Uint8Array(await blob.arrayBuffer());
+    let bin = '';
+    for (let i = 0; i < u8.length; i += 0x8000) bin += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+    await gasCall('POST', null, { action: 'saveToDrive', filename, mimeType: mime, base64: btoa(bin) });
+    toast('Saved to this device and to Google Drive (folder "NNUH Transplant Records") ✓');
+  } catch (e) {
+    toast('Saved to this device. Drive save failed: ' + (e && e.message ? e.message : e), true);
+  }
+};
+
 function renderIframeFormInline(title, htmlSrc, frameId, startNote, storeKey) {
   const wrap = el('div', { class: 'stack' });
   const back = el('button', { class: 'btn btn-ghost', text: '← Back' });
@@ -874,7 +896,7 @@ function renderIframeFormInline(title, htmlSrc, frameId, startNote, storeKey) {
   // The forms were written for Claude artifacts, where claude.use("downloads") offers a
   // save dialog. Outside Claude that API does not exist, so give the form a plain
   // browser-download version of it.
-  const dlShim = '<script>window.claude=window.claude||{use:async function(n){if(n!=="downloads")throw new Error("unsupported");return{save:async function(o){var t=/\\.pdf$/i.test(o.filename)?"application/pdf":/\\.html?$/i.test(o.filename)?"text/html":"application/octet-stream";var b=new Blob([o.data],{type:t});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},2000);}};}};<\/script>';
+  const dlShim = '<script>window.claude=window.claude||{use:async function(n){if(n!=="downloads")throw new Error("unsupported");return{save:function(o){return parent.__histDownload(o.filename,o.data);}};}};<\/script>';
   let finalSrc = String(htmlSrc).replace(/Saved on this device/g, 'Saved');
   finalSrc = /<head[^>]*>/i.test(finalSrc) ? finalSrc.replace(/<head[^>]*>/i, m => m + dlShim) : dlShim + finalSrc;
   if (storeKey && cloudReady()) {
