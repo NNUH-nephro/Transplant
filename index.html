@@ -871,7 +871,12 @@ function renderIframeFormInline(title, htmlSrc, frameId, startNote, storeKey) {
 
   // Set via the DOM property (not the srcdoc attribute string) so none of
   // the form's own markup needs re-escaping.
-  const finalSrc = String(htmlSrc).replace(/Saved on this device/g, 'Saved');
+  // The forms were written for Claude artifacts, where claude.use("downloads") offers a
+  // save dialog. Outside Claude that API does not exist, so give the form a plain
+  // browser-download version of it.
+  const dlShim = '<script>window.claude=window.claude||{use:async function(n){if(n!=="downloads")throw new Error("unsupported");return{save:async function(o){var t=/\\.pdf$/i.test(o.filename)?"application/pdf":/\\.html?$/i.test(o.filename)?"text/html":"application/octet-stream";var b=new Blob([o.data],{type:t});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},2000);}};}};<\/script>';
+  let finalSrc = String(htmlSrc).replace(/Saved on this device/g, 'Saved');
+  finalSrc = /<head[^>]*>/i.test(finalSrc) ? finalSrc.replace(/<head[^>]*>/i, m => m + dlShim) : dlShim + finalSrc;
   if (storeKey && cloudReady()) {
     setStatus('Syncing saved histories…');
     const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timed out')), 12000));
