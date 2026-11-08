@@ -775,8 +775,6 @@ async function histPull(storeKey) {
     const s = server.get(String(l.code));
     if (s) {
       if ((l.ts || '') > (s.ts || '')) { merged.push(l); toPush.push(l); } else merged.push(s);
-    } else if (syncedSet.has(String(l.code))) {
-      /* deleted on another device — drop it here too */
     } else {
       if (!l.ts) l.ts = new Date().toISOString();
       merged.push(l); toPush.push(l);
@@ -811,7 +809,9 @@ function histHook(frame, storeKey, setStatus) {
       if (prev.get(code) !== pj || !r.ts) { r.ts = now; changed.push(r); }
       next.set(code, pj);
     });
-    const removed = [...prev.keys()].filter(c => !cur.has(c));
+    let removed = [...prev.keys()].filter(c => !cur.has(c));
+    // safety: one save never deletes several records from the sheet (guards against a form resetting its list)
+    if (removed.length > 1) removed = [];
     prev = next;
     const out = orig.call(this, k, JSON.stringify(arr));
     if (cloudReady() && (changed.length || removed.length)) {
