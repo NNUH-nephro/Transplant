@@ -381,7 +381,7 @@ const search = { donor: '', recipient: '' };
    who opens the page gets exactly what's set here.
    ============================================================================ */
 const DEFAULT_CFG = {
-  gasUrl: 'https://script.google.com/macros/s/AKfycbyXbcWDntyQ8pIY7FjY0DH6o74_NfPCYSuHX8P7pKWdQFuhsy8iQtxyiZpN-FgOdLbBuw/exec',
+  gasUrl: 'https://script.google.com/macros/s/AKfycbzQvAXZrdcf4NSv-LXsFClAY1QWntMM8_vij9bu7xO2xWiz0GbMwNvGm8IVzwDaEUEiUQ/exec',
   emailjsService: 'service_2a6tr2s',
   emailjsTemplate: 'template_2ama0o7',
   emailjsPublicKey: 'M-kqZPk--hTzMnHt7',
@@ -397,6 +397,8 @@ const loadCfg = () => {
     // default — a blank/never-configured local field must never silently
     // shadow a working shared connection baked into the page.
     Object.keys(stored).forEach((k) => { if (stored[k]) merged[k] = stored[k]; });
+    // retired backend address: always use the current shared one
+    if (/AKfycbyXbcWDntyQ8pIY7FjY0DH6o74/.test(merged.gasUrl || '')) merged.gasUrl = DEFAULT_CFG.gasUrl;
   } catch { /* ignore corrupt local storage, fall back to shared defaults */ }
   return merged;
 };
